@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom"
 import PlanInfo from "./PlanInfo"
 import BillingInfo from "./billingInfo"
 import { Badge } from "./ui/badge"
+import { Button } from "./ui/button"
 import { Card } from "./ui/card"
 
 export default function ServerCard({ now, serverInfo }: { now: number; serverInfo: NezhaServer }) {
@@ -22,12 +23,7 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
     serverInfo,
   )
 
-  const cardClick = (e: React.MouseEvent) => {
-    // 如果点击的是可编辑名称组件或WebShell按钮，不触发导航
-    if ((e.target as HTMLElement).closest('.editable-server-name') || 
-        (e.target as HTMLElement).closest('.webshell-button')) {
-      return
-    }
+  const handleViewDetails = () => {
     sessionStorage.setItem("fromMainPage", "true")
     navigate(`/server/${serverInfo.id}`)
   }
@@ -47,7 +43,7 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
   return online ? (
     <Card
       className={cn(
-        "flex flex-col items-center justify-start gap-3 p-3 md:px-5 cursor-pointer hover:bg-accent/50 transition-colors",
+        "flex flex-col items-center justify-start gap-3 p-3 md:px-5 transition-colors",
         {
           "flex-col": fixedTopServerName,
           "lg:flex-row": !fixedTopServerName,
@@ -56,14 +52,21 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
           "bg-card/70": customBackgroundImage,
         },
       )}
-      onClick={cardClick}
     >
       <section
         className={cn("grid items-center gap-2", {
           "lg:w-40": !fixedTopServerName,
         })}
-        style={{ gridTemplateColumns: "auto auto 1fr" }}
+        style={{ gridTemplateColumns: "auto auto auto 1fr" }}
       >
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleViewDetails}
+          className="h-6 w-12 text-xs"
+        >
+          详情
+        </Button>
         <span className="h-2 w-2 shrink-0 rounded-full bg-green-500 self-center"></span>
         <div className={cn("flex items-center justify-center", showFlag ? "min-w-[17px]" : "min-w-0")}>
           {showFlag ? <ServerFlag country_code={country_code} /> : null}
@@ -169,7 +172,7 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
   ) : (
     <Card
       className={cn(
-        "flex flex-col items-center justify-start gap-3 sm:gap-0 p-3 md:px-5 cursor-pointer hover:bg-accent/50 transition-colors",
+        "flex flex-col items-center justify-start gap-3 sm:gap-0 p-3 md:px-5 transition-colors",
         showNetTransfer ? "lg:min-h-[91px] min-h-[123px]" : "lg:min-h-[61px] min-h-[93px]",
         {
           "flex-col": fixedTopServerName,
@@ -179,14 +182,21 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
           "bg-card/70": customBackgroundImage,
         },
       )}
-      onClick={cardClick}
     >
       <section
         className={cn("grid items-center gap-2", {
           "lg:w-40": !fixedTopServerName,
         })}
-        style={{ gridTemplateColumns: "auto auto 1fr" }}
+        style={{ gridTemplateColumns: "auto auto auto 1fr" }}
       >
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleViewDetails}
+          className="h-6 w-12 text-xs"
+        >
+          详情
+        </Button>
         <span className="h-2 w-2 shrink-0 rounded-full bg-red-500 self-center"></span>
         <div className={cn("flex items-center justify-center", showFlag ? "min-w-[17px]" : "min-w-0")}>
           {showFlag ? <ServerFlag country_code={country_code} /> : null}

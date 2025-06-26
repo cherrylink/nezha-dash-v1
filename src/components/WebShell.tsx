@@ -298,7 +298,19 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
 
     return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
+      <DialogContent 
+        className="max-w-5xl max-h-[90vh] flex flex-col"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation()
+        }}
+        onMouseUp={(e) => {
+          e.stopPropagation()
+        }}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>WebShell - {serverName}</span>
@@ -378,13 +390,23 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
           
           {/* 命令输入区域 */}
           {connectionStatus === 'connected' && (
-            <div className="flex items-center gap-2 mt-4 p-3 border rounded bg-black">
+            <div 
+              className="flex items-center gap-2 mt-4 p-3 border rounded bg-black"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+            >
               <span className="text-blue-400 font-mono text-sm shrink-0">$</span>
               <Input
                 ref={inputRef}
                 value={command}
                 onChange={(e) => setCommand(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }}
                 placeholder="输入命令..."
                 className="bg-transparent border-none text-green-400 font-mono focus-visible:ring-0 focus-visible:ring-offset-0 flex-1"
                 style={{ fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' }}

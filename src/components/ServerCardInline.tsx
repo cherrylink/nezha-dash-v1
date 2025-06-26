@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom"
 
 import PlanInfo from "./PlanInfo"
 import BillingInfo from "./billingInfo"
+import { Button } from "./ui/button"
 import { Card } from "./ui/card"
 import { Separator } from "./ui/separator"
 
@@ -22,11 +23,7 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
     serverInfo,
   )
 
-  const cardClick = (e: React.MouseEvent) => {
-    // 如果点击的是可编辑名称组件，不触发导航
-    if ((e.target as HTMLElement).closest('.editable-server-name')) {
-      return
-    }
+  const handleViewDetails = () => {
     sessionStorage.setItem("fromMainPage", "true")
     navigate(`/server/${serverInfo.id}`)
   }
@@ -41,14 +38,21 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
     <section>
       <Card
         className={cn(
-          "flex items-center lg:flex-row justify-start gap-3 p-3 md:px-5 cursor-pointer hover:bg-accent/50 transition-colors min-w-[1200px] w-full",
+          "flex items-center lg:flex-row justify-start gap-3 p-3 md:px-5 transition-colors min-w-[1200px] w-full",
           {
             "bg-card/70": customBackgroundImage,
           },
         )}
-        onClick={cardClick}
       >
-        <section className={cn("grid items-center gap-2 min-w-[144px] flex-shrink-0")} style={{ gridTemplateColumns: "auto auto 1fr" }}>
+        <section className={cn("grid items-center gap-2 min-w-[160px] flex-shrink-0")} style={{ gridTemplateColumns: "auto auto auto 1fr" }}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleViewDetails}
+            className="h-6 w-12 text-xs"
+          >
+            详情
+          </Button>
           <span className="h-2 w-2 shrink-0 rounded-full bg-green-500 self-center"></span>
           <div className={cn("flex items-center justify-center", showFlag ? "min-w-[17px]" : "min-w-0")}>
             {showFlag ? <ServerFlag country_code={country_code} /> : null}
@@ -134,14 +138,21 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
   ) : (
     <Card
       className={cn(
-        "flex  min-h-[61px] min-w-[1200px] items-center justify-start p-3 md:px-5 flex-row cursor-pointer hover:bg-accent/50 transition-colors",
+        "flex  min-h-[61px] min-w-[1200px] items-center justify-start p-3 md:px-5 flex-row transition-colors",
         {
           "bg-card/70": customBackgroundImage,
         },
       )}
-      onClick={cardClick}
     >
-      <section className={cn("grid items-center gap-2 min-w-[160px] flex-shrink-0")} style={{ gridTemplateColumns: "auto auto 1fr" }}>
+      <section className={cn("grid items-center gap-2 min-w-[180px] flex-shrink-0")} style={{ gridTemplateColumns: "auto auto auto 1fr" }}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleViewDetails}
+          className="h-6 w-12 text-xs"
+        >
+          详情
+        </Button>
         <span className="h-2 w-2 shrink-0 rounded-full bg-red-500 self-center"></span>
         <div className={cn("flex items-center justify-center", showFlag ? "min-w-[17px]" : "min-w-0")}>
           {showFlag ? <ServerFlag country_code={country_code} /> : null}
