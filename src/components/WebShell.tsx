@@ -26,6 +26,7 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected')
   const [session, setSession] = useState<TerminalSession | null>(null)
   const [reconnectCount, setReconnectCount] = useState(0)
+  const [terminalInitialized, setTerminalInitialized] = useState(false)
   
   const terminalRef = useRef<HTMLDivElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
@@ -78,16 +79,18 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
       xtermRef.current = terminal
       fitAddonRef.current = fitAddon
 
+      // 标记终端已初始化
+      setTerminalInitialized(true)
+
       // 显示欢迎信息
-      if (connectionStatus === 'disconnected') {
-        terminal.writeln('\x1b[32mWebShell 终端\x1b[0m')
-        terminal.writeln(!isLogin ? '请先登录后使用WebShell功能' : `点击"连接"按钮连接到服务器 ${serverName}`)
-      }
+      terminal.writeln('\x1b[32mWebShell 终端\x1b[0m')
+      terminal.writeln(!isLogin ? '请先登录后使用WebShell功能' : `点击"连接"按钮连接到服务器 ${serverName}`)
     } catch (error) {
       console.error('Failed to initialize terminal:', error)
       toast.error('终端初始化失败，请刷新页面重试')
+      setTerminalInitialized(false)
     }
-  }, [connectionStatus, isLogin, serverName])
+  }, [isLogin, serverName])
 
   // 清理终端
   const cleanupTerminal = useCallback(() => {
@@ -96,6 +99,7 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
       xtermRef.current = null
       fitAddonRef.current = null
     }
+    setTerminalInitialized(false)
   }, [])
 
   // 清理连接
@@ -224,7 +228,7 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
     }
     
     // 确保终端已经初始化
-    if (!xtermRef.current) {
+    if (!terminalInitialized || !xtermRef.current) {
       toast.error('终端未初始化，请稍后重试')
       return
     }
@@ -276,13 +280,15 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
     if (open) {
       // 确保在初始化终端时清理之前的连接
       cleanupConnection()
+      // 重置初始化状态
+      setTerminalInitialized(false)
       initializeTerminal()
-    }
-    return () => {
+    } else {
+      // 对话框关闭时清理
       cleanupConnection()
       cleanupTerminal()
     }
-  }, [open, initializeTerminal, cleanupConnection, cleanupTerminal])
+  }, [open])
 
   // 窗口大小变化时调整终端大小
   useEffect(() => {
@@ -356,8 +362,8 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
               )}
               
               {connectionStatus === 'disconnected' && (
-                <Button size="sm" onClick={handleConnect} disabled={!isLogin}>
-                  连接
+                <Button size="sm" onClick={handleConnect} disabled={!isLogin || !terminalInitialized}>
+                  {!terminalInitialized ? '初始化中...' : '连接'}
                 </Button>
               )}
               
