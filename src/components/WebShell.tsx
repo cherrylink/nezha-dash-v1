@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { createTerminalSession, getAuthToken } from "@/lib/nezha-api"
+import { useLogin } from "@/hooks/use-login"
 
 interface WebShellProps {
   open: boolean
@@ -22,6 +23,7 @@ interface TerminalSession {
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
 
 export default function WebShell({ open, onOpenChange, serverName, serverId }: WebShellProps) {
+  const { isLogin } = useLogin()
   const [command, setCommand] = useState("")
   const [terminalOutput, setTerminalOutput] = useState("")
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected')
@@ -158,6 +160,11 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
 
   // 连接到服务器
   const handleConnect = useCallback(async () => {
+    if (!isLogin) {
+      toast.error('请先登录后再使用WebShell功能')
+      return
+    }
+    
     try {
       const sessionData = await createSession()
       await connectWebSocket(sessionData)
@@ -166,7 +173,7 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
       setConnectionStatus('error')
       toast.error(`连接失败: ${error instanceof Error ? error.message : '未知错误'}`)
     }
-  }, [createSession, connectWebSocket])
+  }, [isLogin, createSession, connectWebSocket])
 
   // 断开连接
   const handleDisconnect = useCallback(() => {
@@ -312,7 +319,7 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
               </span>
               
               {connectionStatus === 'disconnected' && (
-                <Button size="sm" onClick={handleConnect}>
+                <Button size="sm" onClick={handleConnect} disabled={!isLogin}>
                   连接
                 </Button>
               )}
@@ -341,6 +348,9 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
               )}
             </div>
           </DialogTitle>
+          <DialogDescription>
+            通过WebShell连接到服务器进行命令行操作
+          </DialogDescription>
         </DialogHeader>
         
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
@@ -353,7 +363,9 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
             {connectionStatus === 'disconnected' ? (
               <div className="text-center text-gray-400 py-8">
                 <p>WebShell 终端</p>
-                <p className="text-xs mt-2">点击"连接"按钮连接到服务器 {serverName}</p>
+                <p className="text-xs mt-2">
+                  {!isLogin ? "请先登录后使用WebShell功能" : `点击"连接"按钮连接到服务器 ${serverName}`}
+                </p>
               </div>
             ) : connectionStatus === 'connecting' ? (
               <div className="text-center text-yellow-400 py-8">

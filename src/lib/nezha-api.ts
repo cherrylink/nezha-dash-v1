@@ -142,6 +142,7 @@ export const createTerminalSession = async (serverId: number): Promise<{
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include', // 确保包含cookie
     body: JSON.stringify({
       server_id: serverId
     })
@@ -160,11 +161,11 @@ export const getAuthToken = (): string | null => {
   const cookies = document.cookie.split(';')
   for (let cookie of cookies) {
     const [name, value] = cookie.trim().split('=')
-    if (name === 'nezha_token' || name === 'token') {
+    if (name === 'nz-jwt') {
       return value
     }
   }
   
   // 如果cookie中没有，尝试从localStorage获取
-  return localStorage.getItem('token') || localStorage.getItem('nezha_token')
+  return localStorage.getItem('nz-jwt') || localStorage.getItem('token')
 }

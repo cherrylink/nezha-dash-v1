@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { cn } from "@/lib/utils"
+import { cn, copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
 import { useLogin } from "@/hooks/use-login"
 import { CommandLineIcon } from "@heroicons/react/20/solid"
@@ -44,10 +44,15 @@ export default function ServerNetworkInfo({
     
     try {
       setCopying(true)
-      await navigator.clipboard.writeText(ip_address)
-      toast.success("IP地址已复制到剪贴板")
+      const success = await copyToClipboard(ip_address)
+      
+      if (success) {
+        toast.success("IP地址已复制到剪贴板")
+      } else {
+        toast.error("复制失败，请手动复制")
+      }
     } catch (error) {
-      toast.error("复制失败")
+      toast.error("复制失败，请手动复制")
       console.error("复制失败:", error)
     } finally {
       setTimeout(() => setCopying(false), 500)
@@ -65,15 +70,13 @@ export default function ServerNetworkInfo({
       <>
         <div className={cn("flex flex-col gap-0.5 text-xs", className)}>
           <div className="flex items-center gap-1">
-            {isLogin && (
-              <button
-                onClick={handleWebShell}
-                className="w-4 h-4 flex items-center justify-center text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                title="打开WebShell"
-              >
-                <CommandLineIcon className="w-3 h-3" />
-              </button>
-            )}
+            <button
+              onClick={handleWebShell}
+              className="w-4 h-4 flex items-center justify-center text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              title={isLogin ? "打开WebShell" : "请先登录"}
+            >
+              <CommandLineIcon className="w-3 h-3" />
+            </button>
             {ip_address && (
               <div 
                 className={cn(
