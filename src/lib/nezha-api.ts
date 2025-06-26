@@ -53,3 +53,22 @@ export const fetchSetting = async (): Promise<SettingResponse> => {
   }
   return data
 }
+
+export const updateServerName = async (serverId: number, name: string): Promise<{ success: boolean; error?: string }> => {
+  const response = await fetch(`/api/v1/server/${serverId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: name.trim()
+    })
+  })
+  
+  const data = await response.json()
+  if (!response.ok || data.error) {
+    throw new Error(data.error || 'Update failed')
+  }
+  
+  return data
+}

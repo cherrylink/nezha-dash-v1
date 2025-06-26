@@ -1,6 +1,7 @@
 import ServerFlag from "@/components/ServerFlag"
 import ServerUsageBar from "@/components/ServerUsageBar"
 import ServerNetworkInfo from "@/components/ServerNetworkInfo"
+import EditableServerName from "@/components/EditableServerName"
 import { formatBytes } from "@/lib/format"
 import { GetFontLogoClass, GetOsName, MageMicrosoftWindows } from "@/lib/logo-class"
 import { cn, formatNezhaInfo, parsePublicNote } from "@/lib/utils"
@@ -21,7 +22,11 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
     serverInfo,
   )
 
-  const cardClick = () => {
+  const cardClick = (e: React.MouseEvent) => {
+    // 如果点击的是可编辑名称组件，不触发导航
+    if ((e.target as HTMLElement).closest('.editable-server-name')) {
+      return
+    }
     sessionStorage.setItem("fromMainPage", "true")
     navigate(`/server/${serverInfo.id}`)
   }
@@ -63,7 +68,13 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
           {showFlag ? <ServerFlag country_code={country_code} /> : null}
         </div>
         <div className="relative flex flex-col">
-          <p className={cn("break-normal font-bold tracking-tight", showFlag ? "text-xs " : "text-sm")}>{name}</p>
+          <div className="editable-server-name">
+            <EditableServerName
+              serverId={serverInfo.id}
+              initialName={name}
+              className={cn(showFlag ? "text-xs " : "text-sm")}
+            />
+          </div>
           <div
             className={cn("hidden lg:block", {
               "lg:hidden": fixedTopServerName,
@@ -185,7 +196,13 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
           {showFlag ? <ServerFlag country_code={country_code} /> : null}
         </div>
         <div className="relative flex flex-col">
-          <p className={cn("break-normal font-bold tracking-tight max-w-[108px]", showFlag ? "text-xs" : "text-sm")}>{name}</p>
+          <div className="editable-server-name">
+            <EditableServerName
+              serverId={serverInfo.id}
+              initialName={name}
+              className={cn("max-w-[108px]", showFlag ? "text-xs" : "text-sm")}
+            />
+          </div>
           <div
             className={cn("hidden lg:block", {
               "lg:hidden": fixedTopServerName,

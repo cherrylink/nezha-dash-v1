@@ -1,6 +1,7 @@
 import ServerFlag from "@/components/ServerFlag"
 import ServerUsageBar from "@/components/ServerUsageBar"
 import ServerNetworkInfo from "@/components/ServerNetworkInfo"
+import EditableServerName from "@/components/EditableServerName"
 import { formatBytes } from "@/lib/format"
 import { GetFontLogoClass, GetOsName, MageMicrosoftWindows } from "@/lib/logo-class"
 import { cn, formatNezhaInfo, parsePublicNote } from "@/lib/utils"
@@ -21,7 +22,11 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
     serverInfo,
   )
 
-  const cardClick = () => {
+  const cardClick = (e: React.MouseEvent) => {
+    // 如果点击的是可编辑名称组件，不触发导航
+    if ((e.target as HTMLElement).closest('.editable-server-name')) {
+      return
+    }
     sessionStorage.setItem("fromMainPage", "true")
     navigate(`/server/${serverInfo.id}`)
   }
@@ -49,7 +54,13 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
             {showFlag ? <ServerFlag country_code={country_code} /> : null}
           </div>
           <div className="relative w-28 flex flex-col">
-            <p className={cn("break-normal font-bold tracking-tight", showFlag ? "text-xs " : "text-sm")}>{name}</p>
+            <div className="editable-server-name">
+              <EditableServerName
+                serverId={serverInfo.id}
+                initialName={name}
+                className={cn(showFlag ? "text-xs " : "text-sm")}
+              />
+            </div>
             {parsedData?.billingDataMod && <BillingInfo parsedData={parsedData} />}
           </div>
         </section>
@@ -141,7 +152,13 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
           {showFlag ? <ServerFlag country_code={country_code} /> : null}
         </div>
         <div className="relative flex flex-col">
-          <p className={cn("break-normal font-bold w-28 tracking-tight", showFlag ? "text-xs" : "text-sm")}>{name}</p>
+          <div className="editable-server-name">
+            <EditableServerName
+              serverId={serverInfo.id}
+              initialName={name}
+              className={cn("w-28", showFlag ? "text-xs" : "text-sm")}
+            />
+          </div>
           {parsedData?.billingDataMod && <BillingInfo parsedData={parsedData} />}
         </div>
       </section>
