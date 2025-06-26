@@ -1,5 +1,6 @@
 import ServerFlag from "@/components/ServerFlag"
 import ServerUsageBar from "@/components/ServerUsageBar"
+import ServerNetworkInfo from "@/components/ServerNetworkInfo"
 import { formatBytes } from "@/lib/format"
 import { GetFontLogoClass, GetOsName, MageMicrosoftWindows } from "@/lib/logo-class"
 import { cn, formatNezhaInfo, parsePublicNote } from "@/lib/utils"
@@ -15,7 +16,7 @@ import { Card } from "./ui/card"
 export default function ServerCard({ now, serverInfo }: { now: number; serverInfo: NezhaServer }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { name, country_code, online, cpu, up, down, mem, stg, net_in_transfer, net_out_transfer, public_note, platform } = formatNezhaInfo(
+  const { name, country_code, online, cpu, up, down, mem, stg, net_in_transfer, net_out_transfer, public_note, platform, ip_address, asn } = formatNezhaInfo(
     now,
     serverInfo,
   )
@@ -81,10 +82,21 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
       </div>
       <div className="flex flex-col lg:items-start items-center gap-2">
         <section
-          className={cn("grid grid-cols-5 items-center gap-3", {
-            "lg:grid-cols-6 lg:gap-4": fixedTopServerName,
+          className={cn("grid items-center gap-3", {
+            "grid-cols-5": !fixedTopServerName,
+            "lg:grid-cols-7 lg:gap-4 grid-cols-5": fixedTopServerName,
           })}
         >
+          {fixedTopServerName && (
+            <div className={"hidden col-span-1 items-center lg:flex lg:flex-col gap-1"}>
+              <p className="text-xs text-muted-foreground">{t("serverDetail.ipAddress")}</p>
+              <ServerNetworkInfo 
+                ip_address={ip_address} 
+                asn={asn} 
+                showInline={true}
+              />
+            </div>
+          )}
           {fixedTopServerName && (
             <div className={"hidden col-span-1 items-center lg:flex lg:flex-row gap-2"}>
               <div className="text-xs font-semibold">

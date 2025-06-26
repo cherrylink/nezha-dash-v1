@@ -1,5 +1,6 @@
 import ServerFlag from "@/components/ServerFlag"
 import ServerUsageBar from "@/components/ServerUsageBar"
+import ServerNetworkInfo from "@/components/ServerNetworkInfo"
 import { formatBytes } from "@/lib/format"
 import { GetFontLogoClass, GetOsName, MageMicrosoftWindows } from "@/lib/logo-class"
 import { cn, formatNezhaInfo, parsePublicNote } from "@/lib/utils"
@@ -15,7 +16,7 @@ import { Separator } from "./ui/separator"
 export default function ServerCardInline({ now, serverInfo }: { now: number; serverInfo: NezhaServer }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { name, country_code, online, cpu, up, down, mem, stg, platform, uptime, net_in_transfer, net_out_transfer, public_note } = formatNezhaInfo(
+  const { name, country_code, online, cpu, up, down, mem, stg, platform, uptime, net_in_transfer, net_out_transfer, public_note, ip_address, asn } = formatNezhaInfo(
     now,
     serverInfo,
   )
@@ -35,7 +36,7 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
     <section>
       <Card
         className={cn(
-          "flex items-center lg:flex-row justify-start gap-3 p-3 md:px-5 cursor-pointer hover:bg-accent/50 transition-colors min-w-[900px] w-full",
+          "flex items-center lg:flex-row justify-start gap-3 p-3 md:px-5 cursor-pointer hover:bg-accent/50 transition-colors min-w-[1000px] w-full",
           {
             "bg-card/70": customBackgroundImage,
           },
@@ -54,7 +55,15 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
         </section>
         <Separator orientation="vertical" className="h-8 mx-0 ml-2" />
         <div className="flex flex-col gap-1">
-          <section className={cn("grid grid-cols-9 items-center gap-3 flex-1")}>
+          <section className={cn("grid grid-cols-10 items-center gap-3 flex-1")}>
+            <div className={"flex w-16 flex-col"}>
+              <p className="text-xs text-muted-foreground">{t("serverDetail.ipAddress")}</p>
+              <ServerNetworkInfo 
+                ip_address={ip_address} 
+                asn={asn} 
+                showInline={true}
+              />
+            </div>
             <div className={"items-center flex flex-row gap-2 whitespace-nowrap"}>
               <div className="text-xs font-semibold">
                 {platform.includes("Windows") ? (
@@ -119,7 +128,7 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
   ) : (
     <Card
       className={cn(
-        "flex  min-h-[61px] min-w-[900px] items-center justify-start p-3 md:px-5 flex-row cursor-pointer hover:bg-accent/50 transition-colors",
+        "flex  min-h-[61px] min-w-[1000px] items-center justify-start p-3 md:px-5 flex-row cursor-pointer hover:bg-accent/50 transition-colors",
         {
           "bg-card/70": customBackgroundImage,
         },
