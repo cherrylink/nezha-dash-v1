@@ -149,7 +149,12 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
   }, [connectionStatus, scrollToBottom])
 
   // 连接到服务器
-  const handleConnect = useCallback(async () => {
+  const handleConnect = useCallback(async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault() // 阻止默认行为
+      e.stopPropagation() // 阻止事件冒泡
+    }
+    
     if (!isLogin) {
       toast.error('请先登录后再使用WebShell功能')
       return

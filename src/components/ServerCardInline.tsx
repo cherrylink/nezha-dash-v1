@@ -3,7 +3,7 @@ import ServerUsageBar from "@/components/ServerUsageBar"
 import ServerNetworkInfo from "@/components/ServerNetworkInfo"
 import EditableServerName from "@/components/EditableServerName"
 import { formatBytes } from "@/lib/format"
-import { GetFontLogoClass, GetOsName, MageMicrosoftWindows } from "@/lib/logo-class"
+import { GetOsName } from "@/lib/logo-class"
 import { cn, formatNezhaInfo, parsePublicNote } from "@/lib/utils"
 import { NezhaServer } from "@/types/nezha-api"
 import { useTranslation } from "react-i18next"
@@ -78,13 +78,6 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
               />
             </div>
             <div className={"items-center flex flex-row gap-2 whitespace-nowrap"}>
-              <div className="text-xs font-semibold">
-                {platform.includes("Windows") ? (
-                  <MageMicrosoftWindows className="size-[10px]" />
-                ) : (
-                  <p className={`fl-${GetFontLogoClass(platform)}`} />
-                )}
-              </div>
               <div className={"flex w-14 flex-col"}>
                 <p className="text-xs text-muted-foreground">{t("serverCard.system")}</p>
                 <div className="flex items-center text-[10.5px] font-semibold">{platform.includes("Windows") ? "Windows" : GetOsName(platform)}</div>

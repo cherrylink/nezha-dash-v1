@@ -73,7 +73,7 @@ export default function ServerNetworkInfo({
           <div className="flex items-center gap-1">
             <button
               onClick={handleWebShell}
-              className="w-4 h-4 flex items-center justify-center text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="webshell-button w-4 h-4 flex items-center justify-center text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               title={isLogin ? "打开WebShell" : "请先登录"}
             >
               <CommandLineIcon className="w-3 h-3" />
@@ -117,7 +117,7 @@ export default function ServerNetworkInfo({
             <p className="text-xs text-muted-foreground">WebShell</p>
             <button
               onClick={handleWebShell}
-              className="text-xs bg-muted/50 px-2 py-1 rounded cursor-pointer transition-colors hover:bg-accent/50 flex items-center gap-1"
+              className="webshell-button text-xs bg-muted/50 px-2 py-1 rounded cursor-pointer transition-colors hover:bg-accent/50 flex items-center gap-1"
               title="打开WebShell"
             >
               <CommandLineIcon className="w-3 h-3" />
