@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -9,7 +9,6 @@ import { useLogin } from "@/hooks/use-login"
 // 动态导入类型
 type Terminal = any
 type FitAddon = any
-type WebLinksAddon = any
 
 interface WebShellProps {
   open: boolean
