@@ -26,6 +26,8 @@ interface TerminalSession {
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
 
 export default function WebShell({ open, onOpenChange, serverName, serverId }: WebShellProps) {
+  console.log('WebShell 组件渲染:', { open, serverName, serverId })
+  
   const { isLogin } = useLogin()
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected')
   const [session, setSession] = useState<TerminalSession | null>(null)
@@ -38,7 +40,16 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
 
   // 初始化终端
   const initializeTerminal = useCallback(async () => {
-    if (!terminalRef.current || xtermRef.current) return
+    // 如果终端容器的 DOM 还未渲染完成，则稍后重试，避免初始化过早导致一直停留在"初始化中..."
+    if (!terminalRef.current) {
+      console.debug('Terminal DOM 尚未就绪，稍后重试初始化...')
+      // 使用 requestAnimationFrame / setTimeout 组合可以保证在下一帧再次尝试初始化
+      setTimeout(initializeTerminal, 50)
+      return
+    }
+
+    // 如果已经初始化过则无需再次初始化
+    if (xtermRef.current) return
 
     console.log('开始初始化终端...')
     
