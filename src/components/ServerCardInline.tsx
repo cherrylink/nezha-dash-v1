@@ -41,7 +41,7 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
     <section>
       <Card
         className={cn(
-          "flex items-center lg:flex-row justify-start gap-3 p-3 md:px-5 cursor-pointer hover:bg-accent/50 transition-colors min-w-[1000px] w-full",
+          "flex items-center lg:flex-row justify-start gap-3 p-3 md:px-5 cursor-pointer hover:bg-accent/50 transition-colors min-w-[1200px] w-full",
           {
             "bg-card/70": customBackgroundImage,
           },
@@ -67,7 +67,7 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
         <Separator orientation="vertical" className="h-8 mx-0 ml-2" />
         <div className="flex flex-col gap-1">
           <section className={cn("grid grid-cols-10 items-center gap-3 flex-1")}>
-            <div className={"flex w-16 flex-col"}>
+            <div className={"flex w-32 flex-col"}>
               <p className="text-xs text-muted-foreground">{t("serverDetail.ipAddress")}</p>
               <ServerNetworkInfo 
                 ip_address={ip_address} 
@@ -88,7 +88,7 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
                 <div className="flex items-center text-[10.5px] font-semibold">{platform.includes("Windows") ? "Windows" : GetOsName(platform)}</div>
               </div>
             </div>
-            <div className={"flex w-20 flex-col"}>
+            <div className={"flex w-24 flex-col"}>
               <p className="text-xs text-muted-foreground">{t("serverCard.uptime")}</p>
               <div className="flex items-center text-xs font-semibold">
                 {uptime / 86400 >= 1
@@ -111,23 +111,23 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
               <div className="flex items-center text-xs font-semibold">{stg.toFixed(2)}%</div>
               <ServerUsageBar value={stg} />
             </div>
-            <div className={"flex w-16 flex-col"}>
+            <div className={"flex w-20 flex-col"}>
               <p className="text-xs text-muted-foreground">{t("serverCard.upload")}</p>
               <div className="flex items-center text-xs font-semibold">
                 {up >= 1024 ? `${(up / 1024).toFixed(2)}G/s` : up >= 1 ? `${up.toFixed(2)}M/s` : `${(up * 1024).toFixed(2)}K/s`}
               </div>
             </div>
-            <div className={"flex w-16 flex-col"}>
+            <div className={"flex w-20 flex-col"}>
               <p className="text-xs text-muted-foreground">{t("serverCard.download")}</p>
               <div className="flex items-center text-xs font-semibold">
                 {down >= 1024 ? `${(down / 1024).toFixed(2)}G/s` : down >= 1 ? `${down.toFixed(2)}M/s` : `${(down * 1024).toFixed(2)}K/s`}
               </div>
             </div>
-            <div className={"flex w-20 flex-col"}>
+            <div className={"flex w-24 flex-col"}>
               <p className="text-xs text-muted-foreground">{t("serverCard.totalUpload")}</p>
               <div className="flex items-center text-xs font-semibold">{formatBytes(net_out_transfer)}</div>
             </div>
-            <div className={"flex w-20 flex-col"}>
+            <div className={"flex w-24 flex-col"}>
               <p className="text-xs text-muted-foreground">{t("serverCard.totalDownload")}</p>
               <div className="flex items-center text-xs font-semibold">{formatBytes(net_in_transfer)}</div>
             </div>
@@ -139,7 +139,7 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
   ) : (
     <Card
       className={cn(
-        "flex  min-h-[61px] min-w-[1000px] items-center justify-start p-3 md:px-5 flex-row cursor-pointer hover:bg-accent/50 transition-colors",
+        "flex  min-h-[61px] min-w-[1200px] items-center justify-start p-3 md:px-5 flex-row cursor-pointer hover:bg-accent/50 transition-colors",
         {
           "bg-card/70": customBackgroundImage,
         },

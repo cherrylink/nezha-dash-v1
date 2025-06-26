@@ -42,12 +42,12 @@ export default function ServerNetworkInfo({
   if (showInline) {
     // 内联显示模式（用于卡片视图）
     return (
-      <div className={cn("flex flex-col gap-1", className)}>
+      <div className={cn("flex flex-col gap-0.5 text-xs", className)}>
         {ip_address && (
           <div 
             className={cn(
-              "text-[10px] px-2 py-1 rounded border bg-background/50 font-mono cursor-pointer transition-colors hover:bg-accent/50",
-              copying && "bg-green-100 dark:bg-green-900/20"
+              "font-mono cursor-pointer text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors truncate",
+              copying && "text-green-600 dark:text-green-400"
             )}
             onClick={handleCopyIP}
             title="点击复制IP地址"
@@ -56,7 +56,7 @@ export default function ServerNetworkInfo({
           </div>
         )}
         {asn && (
-          <div className="text-[10px] px-2 py-1 rounded bg-muted/50 text-muted-foreground">
+          <div className="text-muted-foreground text-[10px] truncate">
             {asn}
           </div>
         )}

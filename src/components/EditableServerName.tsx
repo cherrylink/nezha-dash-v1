@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { updateServerName } from "@/lib/nezha-api"
-import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 
 interface EditableServerNameProps {
@@ -66,38 +65,16 @@ export default function EditableServerName({
 
   if (isEditing) {
     return (
-      <div className={cn("flex items-center gap-2", className)}>
-        <Input
-          ref={inputRef}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={handleSave}
-          disabled={isLoading}
-          className="h-6 text-xs px-2 py-1"
-          maxLength={50}
-        />
-        <div className="flex gap-1">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handleSave}
-            disabled={isLoading}
-            className="h-6 px-2 text-xs"
-          >
-            保存
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handleCancel}
-            disabled={isLoading}
-            className="h-6 px-2 text-xs"
-          >
-            取消
-          </Button>
-        </div>
-      </div>
+      <Input
+        ref={inputRef}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={handleSave}
+        disabled={isLoading}
+        className={cn("h-6 text-xs px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600", className)}
+        maxLength={50}
+      />
     )
   }
 
