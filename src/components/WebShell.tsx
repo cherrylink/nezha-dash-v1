@@ -155,19 +155,22 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
         }
 
         ws.onmessage = (event) => {
-          if (xtermRef.current) {
-            if (event.data instanceof Blob) {
-              // 处理二进制消息
-              const reader = new FileReader()
-              reader.onload = () => {
+          if (event.data instanceof Blob) {
+            // 处理二进制消息
+            const reader = new FileReader()
+            reader.onload = () => {
+              // 在异步回调中再次检查终端实例是否存在
+              if (xtermRef.current) {
                 const arrayBuffer = reader.result as ArrayBuffer
                 const uint8Array = new Uint8Array(arrayBuffer)
                 const output = new TextDecoder('utf-8').decode(uint8Array)
                 xtermRef.current.write(output)
               }
-              reader.readAsArrayBuffer(event.data)
-            } else if (typeof event.data === 'string') {
-              // 处理文本消息
+            }
+            reader.readAsArrayBuffer(event.data)
+          } else if (typeof event.data === 'string') {
+            // 处理文本消息
+            if (xtermRef.current) {
               xtermRef.current.write(event.data)
             }
           }
@@ -220,6 +223,12 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
       return
     }
     
+    // 确保终端已经初始化
+    if (!xtermRef.current) {
+      toast.error('终端未初始化，请稍后重试')
+      return
+    }
+    
     try {
       const sessionData = await createSession()
       await connectWebSocket(sessionData)
@@ -265,6 +274,8 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
   // 初始化和清理
   useEffect(() => {
     if (open) {
+      // 确保在初始化终端时清理之前的连接
+      cleanupConnection()
       initializeTerminal()
     }
     return () => {
