@@ -33,84 +33,9 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
   const xtermRef = useRef<any>(null)
   const fitAddonRef = useRef<any>(null)
 
-  // 初始化 xterm.js
-  const initializeTerminal = useCallback(async () => {
-    if (!terminalRef.current || xtermRef.current) return
 
-    try {
-      // 动态导入 xterm.js 和插件
-      const { Terminal } = await import('xterm')
-      const { FitAddon } = await import('@xterm/addon-fit')
-      const { WebLinksAddon } = await import('@xterm/addon-web-links')
-      
-      // 导入 CSS
-      await import('xterm/css/xterm.css')
 
-      const terminal = new Terminal({
-        cursorBlink: true,
-        theme: {
-          background: '#000000',
-          foreground: '#00ff00',
-          cursor: '#00ff00',
-          selectionBackground: '#ffffff40',
-        },
-        fontSize: 14,
-        fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-        rows: 24,
-        cols: 80,
-      })
 
-      const fitAddon = new FitAddon()
-      const webLinksAddon = new WebLinksAddon()
-
-      terminal.loadAddon(fitAddon)
-      terminal.loadAddon(webLinksAddon)
-
-      terminal.open(terminalRef.current)
-      fitAddon.fit()
-
-      // 处理用户输入
-      terminal.onData((data) => {
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-          wsRef.current.send(data)
-        }
-      })
-
-      xtermRef.current = terminal
-      fitAddonRef.current = fitAddon
-
-      // 标记终端已初始化
-      setTerminalInitialized(true)
-
-      // 显示欢迎信息
-      terminal.writeln('\x1b[32mWebShell 终端\x1b[0m')
-      terminal.writeln(!isLogin ? '请先登录后使用WebShell功能' : `点击"连接"按钮连接到服务器 ${serverName}`)
-    } catch (error) {
-      console.error('Failed to initialize terminal:', error)
-      toast.error('终端初始化失败，请刷新页面重试')
-      setTerminalInitialized(false)
-    }
-  }, [isLogin, serverName])
-
-  // 清理终端
-  const cleanupTerminal = useCallback(() => {
-    if (xtermRef.current) {
-      xtermRef.current.dispose()
-      xtermRef.current = null
-      fitAddonRef.current = null
-    }
-    setTerminalInitialized(false)
-  }, [])
-
-  // 清理连接
-  const cleanupConnection = useCallback(() => {
-    if (wsRef.current) {
-      wsRef.current.close()
-      wsRef.current = null
-    }
-    setConnectionStatus('disconnected')
-    setSession(null)
-  }, [])
 
   // 创建终端会话
   const createSession = useCallback(async () => {
@@ -245,13 +170,19 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
 
   // 断开连接
   const handleDisconnect = useCallback(() => {
-    cleanupConnection()
+    if (wsRef.current) {
+      wsRef.current.close()
+      wsRef.current = null
+    }
+    setConnectionStatus('disconnected')
+    setSession(null)
+    
     if (xtermRef.current) {
       xtermRef.current.clear()
       xtermRef.current.writeln('\x1b[33m连接已断开\x1b[0m')
     }
     toast.info('已断开连接')
-  }, [cleanupConnection])
+  }, [])
 
   // 清除终端
   const handleClear = useCallback(() => {
@@ -279,16 +210,100 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
   useEffect(() => {
     if (open) {
       // 确保在初始化终端时清理之前的连接
-      cleanupConnection()
+      if (wsRef.current) {
+        wsRef.current.close()
+        wsRef.current = null
+      }
+      setConnectionStatus('disconnected')
+      setSession(null)
+      
+      // 清理之前的终端
+      if (xtermRef.current) {
+        xtermRef.current.dispose()
+        xtermRef.current = null
+        fitAddonRef.current = null
+      }
+      
       // 重置初始化状态
       setTerminalInitialized(false)
-      initializeTerminal()
+      
+      // 异步初始化终端
+      const initTerminal = async () => {
+        if (!terminalRef.current) return
+
+        try {
+          // 动态导入 xterm.js 和插件
+          const { Terminal } = await import('xterm')
+          const { FitAddon } = await import('@xterm/addon-fit')
+          const { WebLinksAddon } = await import('@xterm/addon-web-links')
+          
+          // 导入 CSS
+          await import('xterm/css/xterm.css')
+
+          const terminal = new Terminal({
+            cursorBlink: true,
+            theme: {
+              background: '#000000',
+              foreground: '#00ff00',
+              cursor: '#00ff00',
+              selectionBackground: '#ffffff40',
+            },
+            fontSize: 14,
+            fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+            rows: 24,
+            cols: 80,
+          })
+
+          const fitAddon = new FitAddon()
+          const webLinksAddon = new WebLinksAddon()
+
+          terminal.loadAddon(fitAddon)
+          terminal.loadAddon(webLinksAddon)
+
+          terminal.open(terminalRef.current)
+          fitAddon.fit()
+
+          // 处理用户输入
+          terminal.onData((data: string) => {
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+              wsRef.current.send(data)
+            }
+          })
+
+          xtermRef.current = terminal
+          fitAddonRef.current = fitAddon
+
+          // 标记终端已初始化
+          setTerminalInitialized(true)
+
+          // 显示欢迎信息
+          terminal.writeln('\x1b[32mWebShell 终端\x1b[0m')
+          terminal.writeln(!isLogin ? '请先登录后使用WebShell功能' : `点击"连接"按钮连接到服务器 ${serverName}`)
+        } catch (error) {
+          console.error('Failed to initialize terminal:', error)
+          toast.error('终端初始化失败，请刷新页面重试')
+          setTerminalInitialized(false)
+        }
+      }
+      
+      initTerminal()
     } else {
       // 对话框关闭时清理
-      cleanupConnection()
-      cleanupTerminal()
+      if (wsRef.current) {
+        wsRef.current.close()
+        wsRef.current = null
+      }
+      setConnectionStatus('disconnected')
+      setSession(null)
+      
+      if (xtermRef.current) {
+        xtermRef.current.dispose()
+        xtermRef.current = null
+        fitAddonRef.current = null
+      }
+      setTerminalInitialized(false)
     }
-  }, [open])
+  }, [open, isLogin, serverName])
 
   // 窗口大小变化时调整终端大小
   useEffect(() => {
