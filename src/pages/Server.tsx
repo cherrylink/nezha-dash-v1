@@ -16,10 +16,12 @@ import { fetchServerGroup } from "@/lib/nezha-api"
 import { cn, formatNezhaInfo } from "@/lib/utils"
 import { NezhaWebsocketResponse } from "@/types/nezha-api"
 import { ServerGroup } from "@/types/nezha-api"
-import { ArrowDownIcon, ArrowUpIcon, ArrowsUpDownIcon, ChartBarSquareIcon, MapIcon, ViewColumnsIcon } from "@heroicons/react/20/solid"
+import { ArrowDownIcon, ArrowUpIcon, ArrowsUpDownIcon, ChartBarSquareIcon, MapIcon, ViewColumnsIcon, Cog6ToothIcon } from "@heroicons/react/20/solid"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useLogin } from "@/hooks/use-login"
+import GroupManagement from "@/components/GroupManagement"
 
 export default function Servers() {
   const { t } = useTranslation()
@@ -30,12 +32,14 @@ export default function Servers() {
   })
   const { lastMessage, connected } = useWebSocketContext()
   const { status } = useStatus()
+  const { isLogin } = useLogin()
   const [showServices, setShowServices] = useState<string>("0")
   const [showMap, setShowMap] = useState<string>("0")
   const [inline, setInline] = useState<string>("0")
   const containerRef = useRef<HTMLDivElement>(null)
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
   const [currentGroup, setCurrentGroup] = useState<string>("All")
+  const [groupManagementOpen, setGroupManagementOpen] = useState<boolean>(false)
 
   const customBackgroundImage = (window.CustomBackgroundImage as string) !== "" ? window.CustomBackgroundImage : undefined
 
@@ -303,6 +307,20 @@ export default function Servers() {
               })}
             />
           </button>
+          {isLogin && (
+            <button
+              onClick={() => setGroupManagementOpen(true)}
+              className={cn(
+                "rounded-[50px] bg-white dark:bg-stone-800 cursor-pointer p-[10px] transition-all border dark:border-none border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]",
+                {
+                  "bg-opacity-70 dark:bg-opacity-70": customBackgroundImage,
+                },
+              )}
+              title="分组管理"
+            >
+              <Cog6ToothIcon className="size-[13px]" />
+            </button>
+          )}
           <GroupSwitch tabs={groupTabs} currentTab={currentGroup} setCurrentTab={handleTagChange} />
         </section>
         <Popover onOpenChange={setSettingsOpen}>
@@ -380,6 +398,14 @@ export default function Servers() {
           ))}
         </section>
       )}
+      
+      {/* 分组管理对话框 */}
+      <GroupManagement
+        open={groupManagementOpen}
+        onOpenChange={setGroupManagementOpen}
+        groups={groupData?.data || []}
+        servers={nezhaWsData?.servers || []}
+      />
     </div>
   )
 }

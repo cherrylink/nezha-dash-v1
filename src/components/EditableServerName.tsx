@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { updateServerName } from "@/lib/nezha-api"
+import { useLogin } from "@/hooks/use-login"
 import { Input } from "./ui/input"
 
 interface EditableServerNameProps {
@@ -17,6 +18,7 @@ export default function EditableServerName({
   className,
   onNameUpdate 
 }: EditableServerNameProps) {
+  const { isLogin } = useLogin()
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState(initialName)
   const [isLoading, setIsLoading] = useState(false)
@@ -81,11 +83,12 @@ export default function EditableServerName({
   return (
     <p 
       className={cn(
-        "break-normal font-bold tracking-tight cursor-pointer hover:bg-accent/50 rounded px-1 py-0.5 transition-colors",
+        "font-bold tracking-tight whitespace-nowrap",
+        isLogin ? "cursor-pointer hover:bg-accent/50 rounded px-1 py-0.5 transition-colors" : "",
         className
       )}
-      onClick={() => setIsEditing(true)}
-      title="点击编辑服务器名称"
+      onClick={isLogin ? () => setIsEditing(true) : undefined}
+      title={isLogin ? "点击编辑服务器名称" : undefined}
     >
       {name}
     </p>

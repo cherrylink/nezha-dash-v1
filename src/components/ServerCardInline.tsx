@@ -48,12 +48,12 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
         )}
         onClick={cardClick}
       >
-        <section className={cn("grid items-center gap-2 lg:w-36")} style={{ gridTemplateColumns: "auto auto 1fr" }}>
+        <section className={cn("grid items-center gap-2 min-w-[144px] flex-shrink-0")} style={{ gridTemplateColumns: "auto auto 1fr" }}>
           <span className="h-2 w-2 shrink-0 rounded-full bg-green-500 self-center"></span>
           <div className={cn("flex items-center justify-center", showFlag ? "min-w-[17px]" : "min-w-0")}>
             {showFlag ? <ServerFlag country_code={country_code} /> : null}
           </div>
-          <div className="relative w-28 flex flex-col">
+          <div className="relative flex flex-col min-w-[112px] flex-1">
             <div className="editable-server-name">
               <EditableServerName
                 serverId={serverInfo.id}
@@ -73,6 +73,8 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
                 ip_address={ip_address} 
                 asn={asn} 
                 showInline={true}
+                serverName={name}
+                serverId={serverInfo.id}
               />
             </div>
             <div className={"items-center flex flex-row gap-2 whitespace-nowrap"}>
@@ -146,17 +148,17 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
       )}
       onClick={cardClick}
     >
-      <section className={cn("grid items-center gap-2 w-40")} style={{ gridTemplateColumns: "auto auto 1fr" }}>
+      <section className={cn("grid items-center gap-2 min-w-[160px] flex-shrink-0")} style={{ gridTemplateColumns: "auto auto 1fr" }}>
         <span className="h-2 w-2 shrink-0 rounded-full bg-red-500 self-center"></span>
         <div className={cn("flex items-center justify-center", showFlag ? "min-w-[17px]" : "min-w-0")}>
           {showFlag ? <ServerFlag country_code={country_code} /> : null}
         </div>
-        <div className="relative flex flex-col">
+        <div className="relative flex flex-col min-w-[112px] flex-1">
           <div className="editable-server-name">
             <EditableServerName
               serverId={serverInfo.id}
               initialName={name}
-              className={cn("w-28", showFlag ? "text-xs" : "text-sm")}
+              className={cn(showFlag ? "text-xs" : "text-sm")}
             />
           </div>
           {parsedData?.billingDataMod && <BillingInfo parsedData={parsedData} />}

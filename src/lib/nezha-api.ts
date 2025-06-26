@@ -72,3 +72,99 @@ export const updateServerName = async (serverId: number, name: string): Promise<
   
   return data
 }
+
+// 分组管理API函数
+export const createServerGroup = async (name: string, servers: number[] = []): Promise<{ success: boolean; error?: string }> => {
+  const response = await fetch('/api/v1/server-group', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: name.trim(),
+      servers
+    })
+  })
+  
+  const data = await response.json()
+  if (!response.ok || data.error) {
+    throw new Error(data.error || 'Create group failed')
+  }
+  
+  return data
+}
+
+export const updateServerGroup = async (groupId: number, name: string, servers: number[]): Promise<{ success: boolean; error?: string }> => {
+  const response = await fetch(`/api/v1/server-group/${groupId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: name.trim(),
+      servers
+    })
+  })
+  
+  const data = await response.json()
+  if (!response.ok || data.error) {
+    throw new Error(data.error || 'Update group failed')
+  }
+  
+  return data
+}
+
+export const deleteServerGroup = async (groupId: number): Promise<{ success: boolean; error?: string }> => {
+  const response = await fetch(`/api/v1/server-group/${groupId}`, {
+    method: 'DELETE'
+  })
+  
+  const data = await response.json()
+  if (!response.ok || data.error) {
+    throw new Error(data.error || 'Delete group failed')
+  }
+  
+  return data
+}
+
+// WebShell相关API函数
+export const createTerminalSession = async (serverId: number): Promise<{ 
+  success: boolean; 
+  data?: { 
+    session_id: string; 
+    server_id: number; 
+    server_name: string; 
+  }; 
+  error?: string; 
+}> => {
+  const response = await fetch('/api/v1/terminal', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      server_id: serverId
+    })
+  })
+  
+  const data = await response.json()
+  if (!response.ok || data.error) {
+    throw new Error(data.error || 'Create terminal session failed')
+  }
+  
+  return data
+}
+
+export const getAuthToken = (): string | null => {
+  // 尝试从cookie中获取token
+  const cookies = document.cookie.split(';')
+  for (let cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'nezha_token' || name === 'token') {
+      return value
+    }
+  }
+  
+  // 如果cookie中没有，尝试从localStorage获取
+  return localStorage.getItem('token') || localStorage.getItem('nezha_token')
+}

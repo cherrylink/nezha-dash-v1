@@ -68,7 +68,7 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
           {showFlag ? <ServerFlag country_code={country_code} /> : null}
         </div>
         <div className="relative flex flex-col">
-          <div className="editable-server-name">
+          <div className="editable-server-name flex-1 min-w-0">
             <EditableServerName
               serverId={serverInfo.id}
               initialName={name}
@@ -105,6 +105,8 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
                 ip_address={ip_address} 
                 asn={asn} 
                 showInline={true}
+                serverName={name}
+                serverId={serverInfo.id}
               />
             </div>
           )}
@@ -196,11 +198,11 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
           {showFlag ? <ServerFlag country_code={country_code} /> : null}
         </div>
         <div className="relative flex flex-col">
-          <div className="editable-server-name">
+          <div className="editable-server-name flex-1 min-w-0">
             <EditableServerName
               serverId={serverInfo.id}
               initialName={name}
-              className={cn("max-w-[108px]", showFlag ? "text-xs" : "text-sm")}
+              className={cn(showFlag ? "text-xs" : "text-sm")}
             />
           </div>
           <div
