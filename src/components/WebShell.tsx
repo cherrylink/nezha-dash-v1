@@ -23,7 +23,6 @@ interface TerminalSession {
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
 
 export default function WebShell({ open, onOpenChange, serverName, serverId }: WebShellProps) {
-  const { t } = useTranslation()
   const [command, setCommand] = useState("")
   const [terminalOutput, setTerminalOutput] = useState("")
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected')
@@ -314,7 +313,7 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
               </span>
               
               {connectionStatus === 'disconnected' && (
-                <Button size="sm" onClick={handleConnect} disabled={connectionStatus === 'connecting'}>
+                <Button size="sm" onClick={handleConnect}>
                   连接
                 </Button>
               )}

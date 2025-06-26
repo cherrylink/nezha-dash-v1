@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useLogin } from "@/hooks/use-login"
-import { TerminalIcon } from "@heroicons/react/20/solid"
+import { CommandLineIcon } from "@heroicons/react/20/solid"
 import WebShell from "./WebShell"
 
 interface ServerNetworkInfoProps {
@@ -71,7 +71,7 @@ export default function ServerNetworkInfo({
                 className="w-4 h-4 flex items-center justify-center text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 title="打开WebShell"
               >
-                <TerminalIcon className="w-3 h-3" />
+                <CommandLineIcon className="w-3 h-3" />
               </button>
             )}
             {ip_address && (
@@ -116,7 +116,7 @@ export default function ServerNetworkInfo({
               className="text-xs bg-muted/50 px-2 py-1 rounded cursor-pointer transition-colors hover:bg-accent/50 flex items-center gap-1"
               title="打开WebShell"
             >
-              <TerminalIcon className="w-3 h-3" />
+              <CommandLineIcon className="w-3 h-3" />
               连接
             </button>
           </div>

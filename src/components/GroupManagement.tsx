@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { useQueryClient, useMutation } from "@tanstack/react-query"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { createServerGroup, updateServerGroup, deleteServerGroup } from "@/lib/nezha-api"
 import { ServerGroup, NezhaServer } from "@/types/nezha-api"
-import { Trash2Icon, EditIcon, PlusIcon } from "@heroicons/react/20/solid"
+import { TrashIcon, PencilIcon, PlusIcon } from "@heroicons/react/20/solid"
 
 interface GroupManagementProps {
   open: boolean
@@ -28,10 +28,8 @@ interface EditingGroup {
 }
 
 export default function GroupManagement({ open, onOpenChange, groups, servers }: GroupManagementProps) {
-  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [editingGroup, setEditingGroup] = useState<EditingGroup | null>(null)
-  const [showCreateForm, setShowCreateForm] = useState(false)
 
   const createMutation = useMutation({
     mutationFn: ({ name, servers }: { name: string; servers: number[] }) =>
@@ -39,7 +37,6 @@ export default function GroupManagement({ open, onOpenChange, groups, servers }:
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["server-group"] })
       toast.success("分组创建成功")
-      setShowCreateForm(false)
       setEditingGroup(null)
     },
     onError: (error: Error) => {
@@ -73,7 +70,6 @@ export default function GroupManagement({ open, onOpenChange, groups, servers }:
 
   const handleCreateGroup = () => {
     setEditingGroup({ name: "", servers: [] })
-    setShowCreateForm(true)
   }
 
   const handleEditGroup = (group: ServerGroup) => {
@@ -82,7 +78,6 @@ export default function GroupManagement({ open, onOpenChange, groups, servers }:
       name: group.group.name,
       servers: group.servers || []
     })
-    setShowCreateForm(false)
   }
 
   const handleSaveGroup = () => {
@@ -166,7 +161,7 @@ export default function GroupManagement({ open, onOpenChange, groups, servers }:
                           onClick={() => handleEditGroup(group)}
                           disabled={updateMutation.isPending}
                         >
-                          <EditIcon className="w-4 h-4" />
+                          <PencilIcon className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"
@@ -174,7 +169,7 @@ export default function GroupManagement({ open, onOpenChange, groups, servers }:
                           onClick={() => handleDeleteGroup(group.group.id)}
                           disabled={deleteMutation.isPending}
                         >
-                          <Trash2Icon className="w-4 h-4 text-red-500" />
+                          <TrashIcon className="w-4 h-4 text-red-500" />
                         </Button>
                       </div>
                     </div>
