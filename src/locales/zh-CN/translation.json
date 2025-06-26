@@ -69,7 +69,9 @@
     "download": "下载",
     "lastActive": "最后上报时间",
     "temperature": "温度",
-    "bootTime": "启动时间"
+    "bootTime": "启动时间",
+    "ipAddress": "IP地址",
+    "asn": "ISP/ASN"
   },
   "serverDetailChart": {
     "process": "进程数",

@@ -69,7 +69,9 @@
     "download": "Download",
     "lastActive": "Last active time",
     "temperature": "Temperature",
-    "bootTime": "Boot time"
+    "bootTime": "Boot time",
+    "ipAddress": "IP Address",
+    "asn": "ISP/ASN"
   },
   "serverDetailChart": {
     "process": "Process",

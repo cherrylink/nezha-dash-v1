@@ -75,6 +75,8 @@ export default function ServerDetailOverview({ server_id }: { server_id: string 
     net_in_transfer,
     last_active_time_string,
     boot_time_string,
+    ip_address,
+    asn,
   } = formatNezhaInfo(nezhaWsData.now, server)
 
   const customBackgroundImage = (window.CustomBackgroundImage as string) !== "" ? window.CustomBackgroundImage : undefined
@@ -189,6 +191,28 @@ export default function ServerDetailOverview({ server_id }: { server_id: string 
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+        )}
+
+        {ip_address && (
+          <Card className="rounded-[10px] bg-transparent border-none shadow-none">
+            <CardContent className="px-1.5 py-1">
+              <section className="flex flex-col items-start gap-0.5">
+                <p className="text-xs text-muted-foreground">{t("serverDetail.ipAddress")}</p>
+                <div className="text-xs font-mono">{ip_address}</div>
+              </section>
+            </CardContent>
+          </Card>
+        )}
+
+        {asn && (
+          <Card className="rounded-[10px] bg-transparent border-none shadow-none">
+            <CardContent className="px-1.5 py-1">
+              <section className="flex flex-col items-start gap-0.5">
+                <p className="text-xs text-muted-foreground">{t("serverDetail.asn")}</p>
+                <div className="text-xs">{asn}</div>
+              </section>
+            </CardContent>
+          </Card>
         )}
       </section>
       <section className="flex flex-wrap gap-2 mt-1">

@@ -9,6 +9,8 @@ export interface NezhaServer {
   public_note: string
   last_active: string
   country_code: string
+  ip_address?: string
+  asn?: string
   host: NezhaServerHost
   state: NezhaServerStatus
 }

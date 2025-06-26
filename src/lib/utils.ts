@@ -42,6 +42,8 @@ export function formatNezhaInfo(now: number, serverInfo: NezhaServer) {
     load_1: serverInfo.state.load_1?.toFixed(2) || 0.0,
     load_5: serverInfo.state.load_5?.toFixed(2) || 0.0,
     load_15: serverInfo.state.load_15?.toFixed(2) || 0.0,
+    ip_address: serverInfo.ip_address || "",
+    asn: serverInfo.asn || "",
     public_note: handlePublicNote(serverInfo.id, serverInfo.public_note || ""),
   }
 }
