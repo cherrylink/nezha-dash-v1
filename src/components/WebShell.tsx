@@ -40,23 +40,28 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
   const initializeTerminal = useCallback(async () => {
     if (!terminalRef.current || xtermRef.current) return
 
+    console.log('开始初始化终端...')
+    
     try {
-      // 动态导入 xterm.js 模块
-      const [
-        { Terminal },
-        { FitAddon },
-        { WebLinksAddon }
-      ] = await Promise.all([
-        import('@xterm/xterm'),
-        import('@xterm/addon-fit'),
-        import('@xterm/addon-web-links')
-      ])
+      console.log('正在动态导入 xterm.js 模块...')
+      
+      // 使用更简单的导入方式
+      const xtermModule = await import('@xterm/xterm')
+      const fitModule = await import('@xterm/addon-fit')
+      const webLinksModule = await import('@xterm/addon-web-links')
+      
+      console.log('模块导入成功，开始创建终端实例...')
 
       // 动态导入 CSS
-      await import('@xterm/xterm/css/xterm.css')
+      try {
+        await import('@xterm/xterm/css/xterm.css')
+        console.log('CSS 导入成功')
+      } catch (cssError) {
+        console.warn('CSS 导入失败，但继续执行:', cssError)
+      }
 
       // 创建终端实例
-      const terminal = new Terminal({
+      const terminal = new xtermModule.Terminal({
         cursorBlink: true,
         theme: {
           background: '#000000',
@@ -68,23 +73,28 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
         fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
         rows: 24,
         cols: 80,
-        scrollback: 1000,
-        allowProposedApi: true
+        scrollback: 1000
       })
 
+      console.log('终端实例创建成功，开始加载插件...')
+
       // 创建插件
-      const fitAddon = new FitAddon()
-      const webLinksAddon = new WebLinksAddon()
+      const fitAddon = new fitModule.FitAddon()
+      const webLinksAddon = new webLinksModule.WebLinksAddon()
 
       // 加载插件
       terminal.loadAddon(fitAddon)
       terminal.loadAddon(webLinksAddon)
 
+      console.log('插件加载成功，打开终端...')
+
       // 打开终端
       terminal.open(terminalRef.current)
       
       // 适配大小
-      fitAddon.fit()
+      setTimeout(() => {
+        fitAddon.fit()
+      }, 100)
 
       // 处理用户输入
       terminal.onData((data: string) => {
@@ -97,6 +107,8 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
       xtermRef.current = terminal
       fitAddonRef.current = fitAddon
 
+      console.log('终端初始化完成！')
+
       // 显示欢迎信息
       terminal.writeln('\x1b[32m✓ WebShell 终端已初始化\x1b[0m')
       if (!isLogin) {
@@ -106,9 +118,29 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
       }
 
       setTerminalReady(true)
+      console.log('终端状态设置为就绪')
     } catch (error) {
       console.error('终端初始化失败:', error)
-      toast.error('终端初始化失败，请刷新页面重试')
+      toast.error(`终端初始化失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      
+      // 即使失败也要设置一个基本的终端界面
+      if (terminalRef.current) {
+        terminalRef.current.innerHTML = `
+          <div style="
+            color: #ff6b6b; 
+            font-family: monospace; 
+            padding: 20px; 
+            background: #000; 
+            height: 100%; 
+            overflow-y: auto;
+          ">
+            <div>✗ 终端初始化失败</div>
+            <div>错误: ${error instanceof Error ? error.message : '未知错误'}</div>
+            <div>请检查网络连接或刷新页面重试</div>
+          </div>
+        `
+      }
+      setTerminalReady(true) // 设置为就绪以显示连接按钮
     }
   }, [isLogin, serverName])
 
