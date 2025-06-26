@@ -51,7 +51,7 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
           background: '#000000',
           foreground: '#00ff00',
           cursor: '#00ff00',
-          selection: '#ffffff40',
+          selectionBackground: '#ffffff40',
         },
         fontSize: 14,
         fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
