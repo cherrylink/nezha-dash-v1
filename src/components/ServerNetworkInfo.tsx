@@ -69,11 +69,11 @@ export default function ServerNetworkInfo({
     // 内联显示模式（用于卡片视图）
     return (
       <>
-        <div className={cn("flex flex-col gap-0.5 text-xs", className)}>
+        <div className={cn("flex flex-col gap-0.5 text-xs w-full", className)}>
           <div className="flex items-center gap-1">
             <button
               onClick={handleWebShell}
-              className="webshell-button w-4 h-4 flex items-center justify-center text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="webshell-button w-4 h-4 flex items-center justify-center text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-shrink-0"
               title={isLogin ? "打开WebShell" : "请先登录"}
             >
               <CommandLineIcon className="w-3 h-3" />
@@ -81,7 +81,7 @@ export default function ServerNetworkInfo({
             {ip_address && (
               <div 
                 className={cn(
-                  "font-mono cursor-pointer text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors truncate",
+                  "font-mono cursor-pointer text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors text-xs",
                   copying && "text-green-600 dark:text-green-400"
                 )}
                 onClick={handleCopyIP}
@@ -92,7 +92,7 @@ export default function ServerNetworkInfo({
             )}
           </div>
           {asn && (
-            <div className="text-muted-foreground text-[10px] truncate">
+            <div className="text-muted-foreground text-[10px] w-full" title={asn}>
               {asn}
             </div>
           )}

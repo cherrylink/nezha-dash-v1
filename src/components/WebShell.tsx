@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { createTerminalSession } from "@/lib/nezha-api"
@@ -24,22 +23,78 @@ type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
 
 export default function WebShell({ open, onOpenChange, serverName, serverId }: WebShellProps) {
   const { isLogin } = useLogin()
-  const [command, setCommand] = useState("")
-  const [terminalOutput, setTerminalOutput] = useState("")
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected')
   const [session, setSession] = useState<TerminalSession | null>(null)
-  const [commandHistory, setCommandHistory] = useState<string[]>([])
-  const [historyIndex, setHistoryIndex] = useState(-1)
   const [reconnectCount, setReconnectCount] = useState(0)
   
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const terminalRef = useRef<HTMLDivElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
+  const xtermRef = useRef<any>(null)
+  const fitAddonRef = useRef<any>(null)
 
-  // 自动滚动到底部
-  const scrollToBottom = useCallback(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+  // 初始化 xterm.js
+  const initializeTerminal = useCallback(async () => {
+    if (!terminalRef.current || xtermRef.current) return
+
+    try {
+      // 动态导入 xterm.js 和插件
+      const { Terminal } = await import('xterm')
+      const { FitAddon } = await import('@xterm/addon-fit')
+      const { WebLinksAddon } = await import('@xterm/addon-web-links')
+      
+      // 导入 CSS
+      await import('xterm/css/xterm.css')
+
+      const terminal = new Terminal({
+        cursorBlink: true,
+        theme: {
+          background: '#000000',
+          foreground: '#00ff00',
+          cursor: '#00ff00',
+          selection: '#ffffff40',
+        },
+        fontSize: 14,
+        fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+        rows: 24,
+        cols: 80,
+      })
+
+      const fitAddon = new FitAddon()
+      const webLinksAddon = new WebLinksAddon()
+
+      terminal.loadAddon(fitAddon)
+      terminal.loadAddon(webLinksAddon)
+
+      terminal.open(terminalRef.current)
+      fitAddon.fit()
+
+      // 处理用户输入
+      terminal.onData((data) => {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(data)
+        }
+      })
+
+      xtermRef.current = terminal
+      fitAddonRef.current = fitAddon
+
+      // 显示欢迎信息
+      if (connectionStatus === 'disconnected') {
+        terminal.writeln('\x1b[32mWebShell 终端\x1b[0m')
+        terminal.writeln(!isLogin ? '请先登录后使用WebShell功能' : `点击"连接"按钮连接到服务器 ${serverName}`)
+      }
+    } catch (error) {
+      console.error('Failed to initialize terminal:', error)
+      toast.error('终端初始化失败，请刷新页面重试')
+    }
+  }, [connectionStatus, isLogin, serverName])
+
+  // 清理终端
+  const cleanupTerminal = useCallback(() => {
+    if (xtermRef.current) {
+      xtermRef.current.dispose()
+      xtermRef.current = null
+      fitAddonRef.current = null
     }
   }, [])
 
@@ -87,29 +142,34 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
           if (!isResolved) {
             isResolved = true
             setConnectionStatus('connected')
-            setTerminalOutput('')
             setReconnectCount(0)
             toast.success(`已连接到服务器 ${sessionData.server_name}`)
+            
+            // 清空终端并显示连接成功信息
+            if (xtermRef.current) {
+              xtermRef.current.clear()
+              xtermRef.current.writeln(`\x1b[32m已连接到服务器: ${sessionData.server_name}\x1b[0m`)
+            }
             resolve()
           }
         }
 
         ws.onmessage = (event) => {
-          if (event.data instanceof Blob) {
-            // 处理二进制消息（终端输出）
-            const reader = new FileReader()
-            reader.onload = () => {
-              const arrayBuffer = reader.result as ArrayBuffer
-              const uint8Array = new Uint8Array(arrayBuffer)
-              const output = new TextDecoder('utf-8').decode(uint8Array)
-              setTerminalOutput(prev => prev + output)
-              scrollToBottom()
+          if (xtermRef.current) {
+            if (event.data instanceof Blob) {
+              // 处理二进制消息
+              const reader = new FileReader()
+              reader.onload = () => {
+                const arrayBuffer = reader.result as ArrayBuffer
+                const uint8Array = new Uint8Array(arrayBuffer)
+                const output = new TextDecoder('utf-8').decode(uint8Array)
+                xtermRef.current.write(output)
+              }
+              reader.readAsArrayBuffer(event.data)
+            } else if (typeof event.data === 'string') {
+              // 处理文本消息
+              xtermRef.current.write(event.data)
             }
-            reader.readAsArrayBuffer(event.data)
-          } else if (typeof event.data === 'string') {
-            // 处理文本消息
-            setTerminalOutput(prev => prev + event.data)
-            scrollToBottom()
           }
         }
 
@@ -146,13 +206,13 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
       setConnectionStatus('error')
       throw error
     }
-  }, [connectionStatus, scrollToBottom])
+  }, [connectionStatus])
 
   // 连接到服务器
   const handleConnect = useCallback(async (e?: React.MouseEvent) => {
     if (e) {
-      e.preventDefault() // 阻止默认行为
-      e.stopPropagation() // 阻止事件冒泡
+      e.preventDefault()
+      e.stopPropagation()
     }
     
     if (!isLogin) {
@@ -173,93 +233,19 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
   // 断开连接
   const handleDisconnect = useCallback(() => {
     cleanupConnection()
-    setTerminalOutput('')
-    setCommand('')
-    setCommandHistory([])
-    setHistoryIndex(-1)
+    if (xtermRef.current) {
+      xtermRef.current.clear()
+      xtermRef.current.writeln('\x1b[33m连接已断开\x1b[0m')
+    }
     toast.info('已断开连接')
   }, [cleanupConnection])
 
-  // 发送命令
-  const sendCommand = useCallback((cmd: string) => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      // 发送文本消息到服务器
-      wsRef.current.send(cmd)
-      
-      // 添加到命令历史
-      if (cmd.trim()) {
-        setCommandHistory(prev => [...prev.slice(-49), cmd.trim()])
-        setHistoryIndex(-1)
-      }
+  // 清除终端
+  const handleClear = useCallback(() => {
+    if (xtermRef.current) {
+      xtermRef.current.clear()
     }
   }, [])
-
-  // 执行命令
-  const executeCommand = useCallback(() => {
-    if (!command.trim() || connectionStatus !== 'connected') return
-
-    const cmd = command + '\r'
-    sendCommand(cmd)
-    setCommand('')
-  }, [command, connectionStatus, sendCommand])
-
-  // 清除终端输出
-  const clearTerminal = useCallback(() => {
-    setTerminalOutput('')
-  }, [])
-
-  // 处理键盘事件
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      executeCommand()
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      if (commandHistory.length > 0) {
-        const newIndex = historyIndex === -1 
-          ? commandHistory.length - 1 
-          : Math.max(0, historyIndex - 1)
-        setHistoryIndex(newIndex)
-        setCommand(commandHistory[newIndex])
-      }
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      if (historyIndex >= 0) {
-        const newIndex = historyIndex + 1
-        if (newIndex >= commandHistory.length) {
-          setHistoryIndex(-1)
-          setCommand("")
-        } else {
-          setHistoryIndex(newIndex)
-          setCommand(commandHistory[newIndex])
-        }
-      }
-    } else if (e.ctrlKey && e.key === 'c') {
-      // Ctrl+C 中断命令
-      e.preventDefault()
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.send('\x03') // 发送中断信号
-      }
-    } else if (e.ctrlKey && e.key === 'l') {
-      // Ctrl+L 清屏
-      e.preventDefault()
-      clearTerminal()
-    }
-  }, [executeCommand, commandHistory, historyIndex, clearTerminal])
-
-  // 效果钩子
-  useEffect(() => {
-    if (open && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [open])
-
-  // 组件卸载时清理连接
-  useEffect(() => {
-    return () => {
-      cleanupConnection()
-    }
-  }, [cleanupConnection])
 
   // 自动重连逻辑
   useEffect(() => {
@@ -275,6 +261,33 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
       return () => clearTimeout(timer)
     }
   }, [connectionStatus, session, reconnectCount, connectWebSocket])
+
+  // 初始化和清理
+  useEffect(() => {
+    if (open) {
+      initializeTerminal()
+    }
+    return () => {
+      cleanupConnection()
+      cleanupTerminal()
+    }
+  }, [open, initializeTerminal, cleanupConnection, cleanupTerminal])
+
+  // 窗口大小变化时调整终端大小
+  useEffect(() => {
+    if (open && fitAddonRef.current) {
+      const handleResize = () => {
+        setTimeout(() => {
+          if (fitAddonRef.current) {
+            fitAddonRef.current.fit()
+          }
+        }, 100)
+      }
+
+      window.addEventListener('resize', handleResize)
+      return () => window.removeEventListener('resize', handleResize)
+    }
+  }, [open])
 
   // 获取连接状态显示文本
   const getStatusText = () => {
@@ -296,10 +309,10 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
     }
   }
 
-    return (
+  return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-5xl max-h-[90vh] flex flex-col"
+        className="max-w-6xl max-h-[90vh] flex flex-col"
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
@@ -324,6 +337,12 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
                 })}></span>
                 {getStatusText()}
               </span>
+              
+              {connectionStatus === 'connected' && (
+                <Button size="sm" variant="outline" onClick={handleClear}>
+                  清屏
+                </Button>
+              )}
               
               {connectionStatus === 'disconnected' && (
                 <Button size="sm" onClick={handleConnect} disabled={!isLogin}>
@@ -361,63 +380,25 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
         </DialogHeader>
         
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-          {/* 终端输出区域 */}
+          {/* xterm.js 终端容器 */}
           <div 
-            className="flex-1 border rounded bg-black text-green-400 font-mono text-sm p-4 overflow-y-auto whitespace-pre-wrap" 
-            ref={scrollRef}
-            style={{ fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' }}
-          >
-            {connectionStatus === 'disconnected' ? (
-              <div className="text-center text-gray-400 py-8">
-                <p>WebShell 终端</p>
-                <p className="text-xs mt-2">
-                  {!isLogin ? "请先登录后使用WebShell功能" : `点击"连接"按钮连接到服务器 ${serverName}`}
-                </p>
-              </div>
-            ) : connectionStatus === 'connecting' ? (
-              <div className="text-center text-yellow-400 py-8">
-                <p>正在连接到服务器...</p>
-              </div>
-            ) : connectionStatus === 'error' ? (
-              <div className="text-center text-red-400 py-8">
-                <p>连接失败</p>
-                <p className="text-xs mt-2">请检查网络连接或服务器状态</p>
-              </div>
-            ) : (
-              <div>{terminalOutput || <div className="text-gray-400">等待终端初始化...</div>}</div>
-            )}
-          </div>
+            ref={terminalRef}
+            className="flex-1 border rounded bg-black"
+            style={{ minHeight: '400px' }}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              // 聚焦到终端
+              if (xtermRef.current) {
+                xtermRef.current.focus()
+              }
+            }}
+          />
           
-          {/* 命令输入区域 */}
-          {connectionStatus === 'connected' && (
-            <div 
-              className="flex items-center gap-2 mt-4 p-3 border rounded bg-black"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-              }}
-            >
-              <span className="text-blue-400 font-mono text-sm shrink-0">$</span>
-              <Input
-                ref={inputRef}
-                value={command}
-                onChange={(e) => setCommand(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                }}
-                placeholder="输入命令..."
-                className="bg-transparent border-none text-green-400 font-mono focus-visible:ring-0 focus-visible:ring-offset-0 flex-1"
-                style={{ fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace' }}
-              />
-            </div>
-          )}
-          
-          {connectionStatus === 'connected' && (
+          {connectionStatus === 'connected' && session && (
             <div className="text-xs text-muted-foreground mt-2 flex justify-between">
-              <span>提示: ↑↓ 浏览历史 | Ctrl+C 中断 | Ctrl+L 清屏</span>
-              <span>会话: {session?.session_id.slice(0, 8)}...</span>
+              <span>提示: 使用标准终端快捷键 | Ctrl+C 中断 | Ctrl+L 清屏</span>
+              <span>会话: {session.session_id.slice(0, 8)}...</span>
             </div>
           )}
         </div>

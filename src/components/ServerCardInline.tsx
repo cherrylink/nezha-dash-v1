@@ -71,7 +71,7 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
         <Separator orientation="vertical" className="h-8 mx-0 ml-2" />
         <div className="flex flex-col gap-1">
           <section className={cn("grid grid-cols-10 items-center gap-3 flex-1")}>
-            <div className={"flex w-32 flex-col"}>
+            <div className={"flex w-36 flex-col"}>
               <p className="text-xs text-muted-foreground">{t("serverDetail.ipAddress")}</p>
               <ServerNetworkInfo 
                 ip_address={ip_address} 
@@ -81,11 +81,9 @@ export default function ServerCardInline({ now, serverInfo }: { now: number; ser
                 serverId={serverInfo.id}
               />
             </div>
-            <div className={"items-center flex flex-row gap-2 whitespace-nowrap"}>
-              <div className={"flex w-14 flex-col"}>
-                <p className="text-xs text-muted-foreground">{t("serverCard.system")}</p>
-                <div className="flex items-center text-[10.5px] font-semibold">{platform.includes("Windows") ? "Windows" : GetOsName(platform)}</div>
-              </div>
+            <div className={"items-center flex flex-col gap-1 w-24"}>
+              <p className="text-xs text-muted-foreground">{t("serverCard.system")}</p>
+              <div className="flex items-center text-[10.5px] font-semibold">{platform.includes("Windows") ? "Windows" : GetOsName(platform)}</div>
             </div>
             <div className={"flex w-24 flex-col"}>
               <p className="text-xs text-muted-foreground">{t("serverCard.uptime")}</p>

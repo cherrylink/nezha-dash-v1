@@ -97,29 +97,29 @@ export default function ServerCard({ now, serverInfo }: { now: number; serverInf
       </div>
       <div className="flex flex-col lg:items-start items-center gap-2">
         <section
-          className={cn("grid items-center gap-3", {
-            "grid-cols-5": !fixedTopServerName,
-            "lg:grid-cols-7 lg:gap-4 grid-cols-5": fixedTopServerName,
+          className={cn("grid items-center", {
+            "grid-cols-5 gap-3": !fixedTopServerName,
+            "lg:grid-cols-7 lg:gap-2 grid-cols-5 gap-3": fixedTopServerName,
           })}
         >
           {fixedTopServerName && (
-            <div className={"hidden col-span-1 items-center lg:flex lg:flex-col gap-1"}>
+            <div className={"hidden col-span-1 items-center lg:flex lg:flex-col gap-1 w-32"}>
               <p className="text-xs text-muted-foreground">{t("serverDetail.ipAddress")}</p>
-              <ServerNetworkInfo 
-                ip_address={ip_address} 
-                asn={asn} 
-                showInline={true}
-                serverName={name}
-                serverId={serverInfo.id}
-              />
+              <div className="w-full">
+                <ServerNetworkInfo 
+                  ip_address={ip_address} 
+                  asn={asn} 
+                  showInline={true}
+                  serverName={name}
+                  serverId={serverInfo.id}
+                />
+              </div>
             </div>
           )}
           {fixedTopServerName && (
-            <div className={"hidden col-span-1 items-center lg:flex lg:flex-row gap-2"}>
-              <div className={"flex w-14 flex-col"}>
-                <p className="text-xs text-muted-foreground">{t("serverCard.system")}</p>
-                <div className="flex items-center text-[10.5px] font-semibold">{platform.includes("Windows") ? "Windows" : GetOsName(platform)}</div>
-              </div>
+            <div className={"hidden col-span-1 items-center lg:flex lg:flex-col gap-1 w-20"}>
+              <p className="text-xs text-muted-foreground">{t("serverCard.system")}</p>
+              <div className="flex items-center text-[10.5px] font-semibold w-full">{platform.includes("Windows") ? "Windows" : GetOsName(platform)}</div>
             </div>
           )}
           <div className={"flex w-14 flex-col"}>
