@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { createTerminalSession, getAuthToken } from "@/lib/nezha-api"
+import { createTerminalSession } from "@/lib/nezha-api"
 import { useLogin } from "@/hooks/use-login"
 
 interface WebShellProps {
@@ -57,11 +57,6 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
   const createSession = useCallback(async () => {
     try {
       setConnectionStatus('connecting')
-      const token = getAuthToken()
-      if (!token) {
-        throw new Error('未找到认证token，请先登录')
-      }
-
       const response = await createTerminalSession(serverId)
       if (response.success && response.data) {
         setSession(response.data)
@@ -78,14 +73,9 @@ export default function WebShell({ open, onOpenChange, serverName, serverId }: W
   // 建立WebSocket连接
   const connectWebSocket = useCallback(async (sessionData: TerminalSession) => {
     try {
-      const token = getAuthToken()
-      if (!token) {
-        throw new Error('未找到认证token')
-      }
-
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
       const host = window.location.host
-      const wsUrl = `${protocol}//${host}/api/v1/ws/terminal/${sessionData.session_id}?token=${encodeURIComponent(token)}`
+      const wsUrl = `${protocol}//${host}/api/v1/ws/terminal/${sessionData.session_id}`
 
       const ws = new WebSocket(wsUrl)
       wsRef.current = ws

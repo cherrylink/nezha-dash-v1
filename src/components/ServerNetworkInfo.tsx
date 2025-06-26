@@ -60,6 +60,7 @@ export default function ServerNetworkInfo({
   }
 
   const handleWebShell = (e: React.MouseEvent) => {
+    e.preventDefault() // 阻止默认行为
     e.stopPropagation() // 阻止事件冒泡
     setWebShellOpen(true)
   }
